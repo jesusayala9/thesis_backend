@@ -1,16 +1,16 @@
-// filepath: /backend/models/index.js
-const { Sequelize } = require('sequelize');
-const config = require('../config/config.json').development;
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = new Sequelize('postgres://usuario:12345@localhost:5432/sistema_recomendacionf');
 
-const sequelize = new Sequelize(config.database, config.username, config.password, {
-    host: config.host,
-    dialect: config.dialect,
-});
+const User = require('./user')(sequelize, DataTypes);
+const Preference = require('./preference')(sequelize, DataTypes);
+const Motorcycle = require('./motorcycle')(sequelize, DataTypes);
 
-const db = {};
-db.Sequelize = Sequelize;
-db.sequelize = sequelize;
-
-db.User = require('./user')(sequelize, Sequelize);
+const db = {
+    User,
+    Preference,
+    Motorcycle,
+    sequelize,
+    Sequelize
+};
 
 module.exports = db;

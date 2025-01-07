@@ -3,12 +3,16 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('./models');
 const userRoutes = require('./routes/userRoutes');
+const preferenceRoutes = require('./routes/preferenceRoutes');
+const recommendationRoutes = require('./routes/recommendationRoutes');
 
 const app = express();
-app.use(cors()); // Asegúrate de que CORS esté habilitado
+app.use(cors());
 app.use(bodyParser.json());
 
 app.use('/api', userRoutes);
+app.use('/api', preferenceRoutes);
+app.use('/api', recommendationRoutes);
 
 db.sequelize.authenticate()
     .then(() => {
