@@ -3,16 +3,18 @@ const User = require("../models/user")(
   sequelize,
   require("sequelize").DataTypes
 );
+
 module.exports = (sequelize, DataTypes) => {
-  const Preference = sequelize.define(
-    "Preference",
+  const Recommendations = sequelize.define(
+    "Recommendations",
     {
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
-      userId: {
+
+      user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -22,21 +24,30 @@ module.exports = (sequelize, DataTypes) => {
       },
       nombre: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       marca: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: false,
       },
+
       cilindraje: {
-        type: DataTypes.FLOAT,
-        allowNull: true,
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+      },
+      imagen: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      modelo: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
     },
     {
-      tableName: "preferences",
+      tableName: "recomendaciones",
     }
   );
 
-  return Preference;
+  return Recommendations;
 };
