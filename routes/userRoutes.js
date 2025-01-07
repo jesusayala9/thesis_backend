@@ -1,8 +1,9 @@
-// filepath: /C:/Users/petus/Desktop/Trabajo de grado 2/thesis_frontend-main/thesis_frontend-main/thesis_backend-main/routes/userRoutes.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const userController = require('../controllers/userController');
+const userController = require("../controllers/userController");
+const authController = require("../controllers/authController");
 
-router.post('/register', userController.register);
+router.post("/user/register", userController.register);
+router.post("/user/login", authController.login);
 
 module.exports = router;
