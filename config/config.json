@@ -1,0 +1,9 @@
+{
+    "development": {
+        "username": "usuario",
+        "password": "12345",
+        "database": "sistema_recomendacionf",
+        "host": "127.0.0.1",
+        "dialect": "postgres"
+    }
+}
