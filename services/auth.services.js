@@ -9,7 +9,6 @@ const config = require("../config/config.aut");
 
 const loginUser = async (correo, contraseña) => {
   try {
-    // Buscar al usuario por correo
     const user = await User.findOne({ where: { correo } });
 
     if (!user) {
