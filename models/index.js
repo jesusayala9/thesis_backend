@@ -5,6 +5,10 @@ const User = require('./user')(sequelize, DataTypes);
 const Preference = require('./preference')(sequelize, DataTypes);
 const Motorcycle = require('./motorcycle')(sequelize, DataTypes);
 
+// Definir relaciones
+User.hasMany(Preference, { foreignKey: 'userId' });
+Preference.belongsTo(User, { foreignKey: 'userId' });
+
 const db = {
     User,
     Preference,
