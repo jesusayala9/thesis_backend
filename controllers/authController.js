@@ -7,6 +7,13 @@ exports.login = async (req, res) => {
 
     const { user, token } = await loginUser(correo, contraseña);
 
+    // Configurar la cookie con el token
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: false,
+      maxAge: 3600000,
+    });
+
     res.status(200).json({
       message: "Login exitoso",
       user: {

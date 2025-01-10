@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const { sequelize, testConnection } = require("./config/config.db");
 const { loadModels } = require("./modelLoader/modelLoader");
@@ -13,6 +14,7 @@ const config = require("./config/config.env");
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use("/api", userRoutes);
 app.use("/api", preferenceRoutes);

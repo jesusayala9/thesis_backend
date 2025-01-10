@@ -9,7 +9,6 @@ const config = require("../config/config.env");
 
 const loginUser = async (correo, contraseña) => {
   try {
-    // Buscar al usuario por correo
     const user = await User.findOne({ where: { correo } });
 
     if (!user) {
@@ -21,7 +20,7 @@ const loginUser = async (correo, contraseña) => {
     if (!validPassword) {
       throw new Error("Contraseña incorrecta");
     }
-
+    // Crear token
     const token = jwt.sign(
       { id: user.id, correo: user.correo },
       config.secret_key,
@@ -30,7 +29,7 @@ const loginUser = async (correo, contraseña) => {
 
     return { user, token };
   } catch (error) {
-    throw new Error("Error al iniciar sesión: " + error.message);
+    throw new Error(error.message);
   }
 };
 
