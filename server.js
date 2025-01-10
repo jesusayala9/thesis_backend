@@ -7,6 +7,7 @@ const { loadModels } = require("./modelLoader/modelLoader");
 const userRoutes = require("./routes/userRoutes");
 const preferenceRoutes = require("./routes/preferenceRoutes");
 const recommendationRoutes = require("./routes/recommendationRoutes");
+const authRoutes = require("./routes/authRoutes");
 const config = require("./config/config.env");
 
 const app = express();
@@ -17,8 +18,10 @@ app.use("/api", userRoutes);
 app.use("/api", preferenceRoutes);
 app.use("/api", recommendationRoutes);
 app.use("/api", userRoutes);
+app.use("/api/auth", authRoutes);
 
-const PORT = config.port || 3002;
+
+const PORT = config.port || 3001;
 
 async function testServer() {
   try {

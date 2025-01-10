@@ -5,7 +5,7 @@ const User = require("../models/user")(
   sequelize,
   require("sequelize").DataTypes
 );
-const config = require("../config/config.aut");
+const config = require("../config/config.env");
 
 const loginUser = async (correo, contraseña) => {
   try {
