@@ -9,6 +9,8 @@ const userRoutes = require("./routes/userRoutes");
 const preferenceRoutes = require("./routes/preferenceRoutes");
 const recommendationRoutes = require("./routes/recommendationRoutes");
 const authRoutes = require("./routes/authRoutes");
+const recoveryRoutes = require("./routes/password-recovery");
+const getUser = require("./routes/get-user.router");
 const config = require("./config/config.env");
 
 const app = express();
@@ -21,7 +23,8 @@ app.use("/api", preferenceRoutes);
 app.use("/api", recommendationRoutes);
 app.use("/api", userRoutes);
 app.use("/api/auth", authRoutes);
-
+app.use("/api", recoveryRoutes);
+app.use("/api", getUser);
 
 const PORT = config.port || 3001;
 
