@@ -32,8 +32,8 @@ const sendRecoveryEmail = async (email, newPassword) => {
   await transporter.sendMail(mailOptions);
 };
 
-const recoverPassword = async (email) => {
-  const user = await User.findOne({ where: { correo: email } });
+const recoverPassword = async (correo) => {
+  const user = await User.findOne({ where: { correo: correo } });
 
   if (!user) {
     throw new Error("Usuario no encontrado");
@@ -47,10 +47,10 @@ const recoverPassword = async (email) => {
   await user.save();
 
   console.log(
-    `Contraseña actualizada para el usuario ${email}: ${newPassword}`
+    `Contraseña actualizada para el usuario ${correo}: ${newPassword}`
   );
 
-  await sendRecoveryEmail(email, newPassword);
+  await sendRecoveryEmail(correo, newPassword);
 
   return "Correo enviado con la nueva contraseña.";
 };

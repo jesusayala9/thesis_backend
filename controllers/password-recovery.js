@@ -1,14 +1,14 @@
 const { recoverPassword } = require("../services/password-recovery");
 
 const recoverPasswordController = async (req, res) => {
-  const { email } = req.body;
+  const { correo } = req.body;
 
   try {
-    if (!email) {
+    if (!correo) {
       return res.status(400).json({ error: "El correo es obligatorio." });
     }
 
-    const message = await recoverPassword(email);
+    const message = await recoverPassword(correo);
     res.status(200).json({ message });
   } catch (error) {
     console.error("Error en la recuperación de contraseña:", error.message);
