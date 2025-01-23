@@ -4,7 +4,6 @@ const {
   getAllMotorcyclesController,
 } = require("../controllers/motorcycleController");
 
-// Ruta para obtener todos los usuarios
 router.get("/motorcycle", getAllMotorcyclesController);
 
 module.exports = router;
