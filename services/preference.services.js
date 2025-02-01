@@ -1,17 +1,15 @@
 const { sequelize } = require("../config/config.db");
+const Preference = require("../models/preference")(sequelize, require("sequelize").DataTypes);
 
-const Preference = require("../models/preference")(
-  sequelize,
-  require("sequelize").DataTypes
-);
-
-const addPreference = async ({ userId, nombre, marca, cilindraje }) => {
+const addPreference = async ({ userId, nombre, marca, cilindraje, precioMin, precioMax }) => {
   try {
     const preference = await Preference.create({
       userId,
-      nombre,
-      marca,
-      cilindraje,
+      nombre: nombre || null,
+      marca: marca || null,
+      cilindraje: cilindraje ? parseFloat(cilindraje) : null,
+      precioMin: precioMin || null,
+      precioMax: precioMax || null,
     });
     return preference;
   } catch (error) {

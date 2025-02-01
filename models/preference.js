@@ -19,7 +19,6 @@ module.exports = (sequelize, DataTypes) => {
           model: User,
           key: "id",
         },
-
       },
       nombre: {
         type: DataTypes.STRING,
@@ -33,9 +32,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.FLOAT,
         allowNull: true,
       },
+      precioMin: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+      precioMax: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
     },
     {
       tableName: "preferences",
+      timestamps: true,
     }
   );
 

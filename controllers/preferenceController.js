@@ -4,16 +4,23 @@ const config = require("../config/config.env"); // Importar la configuración
 
 exports.addPreference = async (req, res) => {
   try {
-    const token = req.headers.authorization.split(' ')[1];
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "No se proporcionó un token de autorización" });
+    }
+
+    const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, config.secret_key); // Usar la clave secreta
     const userId = decoded.id;
 
-    const { nombre, marca, cilindraje } = req.body;
+    const { nombre, marca, cilindraje, precioMin, precioMax } = req.body;
     const preference = await preferenceService.addPreference({
       userId,
       nombre,
       marca,
       cilindraje,
+      precioMin,
+      precioMax,
     });
     res.status(201).json(preference);
   } catch (error) {

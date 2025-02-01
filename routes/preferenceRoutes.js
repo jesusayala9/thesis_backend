@@ -1,7 +1,8 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const preferenceController = require("../controllers/preferenceController");
+const preferenceController = require('../controllers/preferenceController');
 
-router.post("/user/addPreference", preferenceController.addPreference);
+// Definir la ruta para agregar preferencias
+router.post('/user/addPreference', preferenceController.addPreference);
 
 module.exports = router;
