@@ -34,7 +34,7 @@ except Exception as e:
 def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
     # Preparar los datos para Surprise
     reader = Reader(rating_scale=(1, 5))
-    data = Dataset.load_from_df(ratings_df[['user_id', 'moto_id', 'rating']], reader)
+    data = Dataset.load_from_df(ratings_df[['userId', 'motoId', 'rating']], reader)  # Asegúrate de usar los nombres correctos de las columnas
     
     # Dividir los datos en conjuntos de entrenamiento y prueba
     trainset, testset = train_test_split(data, test_size=0.25)
@@ -59,7 +59,7 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
         motos_filtradas = motos_df
     
     # Obtener todas las motos que el usuario no ha calificado
-    motos_no_calificadas = motos_filtradas[~motos_filtradas['id'].isin(ratings_df[ratings_df['user_id'] == int(user_id)]['moto_id'])]
+    motos_no_calificadas = motos_filtradas[~motos_filtradas['id'].isin(ratings_df[ratings_df['userId'] == int(user_id)]['motoId'])]
     
     # Predecir las calificaciones para las motos no calificadas
     predicciones = []
@@ -98,6 +98,7 @@ except Exception as e:
 # Imprimir las recomendaciones en formato JSON
 try:
     recomendaciones_json = recomendaciones[['nombre', 'marca', 'cilindraje', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo']].to_json(orient="records")
+    # Asegúrate de que la salida final sea solo JSON
     print(recomendaciones_json)
 except Exception as e:
     print(f"Error al convertir recomendaciones a JSON: {e}")

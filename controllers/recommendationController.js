@@ -1,9 +1,17 @@
 const { exec } = require('child_process');
+const path = require('path');
+const db = require('../models');
 
-exports.getRecommendations = (req, res) => {
+exports.getRecommendations = async (req, res) => {
     const { userId, num_recomendaciones } = req.body;
 
-    exec(`python3 recommendation_script.py ${userId} ${num_recomendaciones}`, (error, stdout, stderr) => {
+    // Construir la ruta completa al script de Python
+    const scriptPath = path.join(__dirname, '../recommendation/svd_algoritm.py');
+
+    // Ejecutar el script de Python con los parámetros necesarios
+    const command = `python "${scriptPath}" ${userId} ${num_recomendaciones}`;
+    console.log(`Ejecutando comando: ${command}`);
+    exec(command, (error, stdout, stderr) => {
         if (error) {
             console.error(`Error ejecutando el script: ${error.message}`);
             return res.status(500).json({ error: error.message });
