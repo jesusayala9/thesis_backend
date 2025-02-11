@@ -12,6 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const recoveryRoutes = require("./routes/password-recovery");
 const getUser = require("./routes/get-user.router");
 const getMotorcycle = require("./routes/motorcycleRouter");
+const profileRoutes = require("./routes/profileRoutes"); // Importar las rutas del perfil
 const config = require("./config/config.env");
 
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", recoveryRoutes);
 app.use("/api", getUser);
 app.use("/api", getMotorcycle);
+app.use("/api", profileRoutes); // Usar las rutas del perfil
 
 const PORT = config.port || 3001;
 

@@ -1,8 +1,5 @@
 const { sequelize } = require("../config/config.db");
-const User = require("../models/user")(
-  sequelize,
-  require("sequelize").DataTypes
-);
+const User = require("../models/user")(sequelize, require("sequelize").DataTypes);
 
 const getAllUsers = async () => {
   try {
@@ -13,4 +10,13 @@ const getAllUsers = async () => {
   }
 };
 
-module.exports = { getAllUsers };
+const getUserById = async (id) => {
+  try {
+    const user = await User.findByPk(id);
+    return user;
+  } catch (error) {
+    throw new Error("Error al obtener el usuario: " + error.message);
+  }
+};
+
+module.exports = { getAllUsers, getUserById };
