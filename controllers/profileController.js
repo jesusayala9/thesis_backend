@@ -1,4 +1,4 @@
-const { getUserById, updateUserProfileImage } = require('../services/get-users');
+const { getUserById, updateUserProfileImage, updateUserProfile } = require('../services/get-users');
 
 exports.getUserProfile = async (req, res) => {
     const userId = req.params.id;
@@ -28,5 +28,21 @@ exports.updateUserProfileImage = async (req, res) => {
     } catch (error) {
         console.error('Error al actualizar la imagen de perfil:', error);
         res.status(500).json({ error: 'Error al actualizar la imagen de perfil' });
+    }
+};
+
+exports.updateUserProfile = async (req, res) => {
+    const userId = req.params.id;
+    const { nombre, correo } = req.body;
+
+    try {
+        const user = await updateUserProfile(userId, { nombre, correo });
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error al actualizar los datos del usuario:', error);
+        res.status(500).json({ error: 'Error al actualizar los datos del usuario' });
     }
 };
