@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      profileImage: {
+        type: DataTypes.TEXT, // Asegúrate de que el campo esté definido
+        allowNull: true,
+      },
     },
     {
       tableName: "usuarios",

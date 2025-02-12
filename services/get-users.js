@@ -19,4 +19,18 @@ const getUserById = async (id) => {
   }
 };
 
-module.exports = { getAllUsers, getUserById };
+const updateUserProfileImage = async (id, profileImage) => {
+  try {
+    const user = await User.findByPk(id);
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+    user.profileImage = profileImage;
+    await user.save();
+    return user;
+  } catch (error) {
+    throw new Error("Error al actualizar la imagen de perfil: " + error.message);
+  }
+};
+
+module.exports = { getAllUsers, getUserById, updateUserProfileImage };
