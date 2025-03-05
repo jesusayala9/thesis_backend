@@ -1,53 +1,31 @@
-const { sequelize } = require("../config/config.db");
-const User = require("../models/user")(
-    sequelize,
-    require("sequelize").DataTypes
-);
-
 module.exports = (sequelize, DataTypes) => {
-    const Recommendations = sequelize.define(
-        "Recommendations",
+    const Recomendacion = sequelize.define(
+        "Recomendacion",
         {
             id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
                 primaryKey: true,
             },
-
-            user_id: {
+            userId: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                references: {
-                    model: User,
-                    key: "id",
-                },
             },
-            nombre: {
-                type: DataTypes.STRING,
+            motoId: {
+                type: DataTypes.INTEGER,
                 allowNull: false,
             },
-            marca: {
-                type: DataTypes.STRING,
+            createdAt: {
+                type: DataTypes.DATE,
                 allowNull: false,
-            },
-
-            cilindraje: {
-                type: DataTypes.DECIMAL,
-                allowNull: false,
-            },
-            imagen: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
-            modelo: {
-                type: DataTypes.STRING,
-                allowNull: false,
+                defaultValue: DataTypes.NOW,
             },
         },
         {
             tableName: "recomendaciones",
+            timestamps: false, // Desactivar las marcas de tiempo automáticas
         }
     );
 
-    return Recommendations;
+    return Recomendacion;
 };

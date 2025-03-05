@@ -1,6 +1,6 @@
 const { exec } = require('child_process');
 const path = require('path');
-const db = require('../models');
+const { guardarRecomendaciones } = require('../services/recommendation.services');
 
 exports.getRecommendations = async (req, res) => {
     const { userId, num_recomendaciones } = req.body;
@@ -29,4 +29,17 @@ exports.getRecommendations = async (req, res) => {
             res.status(500).json({ error: parseError.message });
         }
     });
+};
+
+exports.guardarRecomendaciones = async (req, res) => {
+    const { userId, motoIds } = req.body;
+    console.log("Solicitud para guardar recomendaciones:", { userId, motoIds });
+
+    try {
+        await guardarRecomendaciones(userId, motoIds);
+        res.status(200).json({ message: 'Recomendaciones guardadas correctamente' });
+    } catch (error) {
+        console.error("Error al guardar las recomendaciones:", error);
+        res.status(500).json({ error: 'Error al guardar las recomendaciones' });
+    }
 };

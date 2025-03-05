@@ -14,7 +14,7 @@ try:
     connection = engine.connect()
     connection.close()
 except Exception as e:
-    print(f"Error al conectar a la base de datos: {e}")
+    print(f"{{\"error\": \"Error al conectar a la base de datos: {e}\"}}")
     sys.exit(1)
 
 try:
@@ -27,7 +27,7 @@ try:
     motos_df = pd.read_sql(motos_query, engine)
     ratings_df = pd.read_sql(ratings_query, engine)
 except Exception as e:
-    print(f"Error al obtener datos de la base de datos: {e}")
+    print(f"{{\"error\": \"Error al obtener datos de la base de datos: {e}\"}}")
     sys.exit(1)
 
 # Definir la función de recomendación colaborativa
@@ -46,15 +46,24 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
     # Filtrar las motos basadas en las preferencias del usuario
     if not preferences_df.empty:
         user_preferences = preferences_df.iloc[0]
-        nombre = user_preferences['nombre']
-        marca = user_preferences['marca']
-        cilindraje = user_preferences['cilindraje']
+        nombre = user_preferences.get('nombre')
+        marca = user_preferences.get('marca')
+        cilindraje = user_preferences.get('cilindraje')
         
-        motos_filtradas = motos_df[
-            (motos_df['nombre'] == nombre) |
-            (motos_df['marca'] == marca) |
-            (motos_df['cilindraje'] == cilindraje)
-        ]
+        # Asegurarse de que el tipo de datos de cilindraje sea el mismo
+        cilindraje = float(cilindraje) if cilindraje is not None else None
+        motos_df['cilindraje'] = motos_df['cilindraje'].astype(float)
+        
+        # Crear una máscara de filtro basada en las preferencias disponibles
+        filtro = pd.Series([True] * len(motos_df))
+        if nombre:
+            filtro &= (motos_df['nombre'] == nombre)
+        if marca:
+            filtro &= (motos_df['marca'] == marca)
+        if cilindraje is not None:
+            filtro &= (motos_df['cilindraje'] == cilindraje)
+        
+        motos_filtradas = motos_df[filtro]
     else:
         motos_filtradas = motos_df
     
@@ -64,7 +73,7 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
     # Predecir las calificaciones para las motos no calificadas
     predicciones = []
     for moto_id in motos_no_calificadas['id']:
-        pred = algo.predict(user_id, moto_id)
+        pred = algo.predict(int(user_id), moto_id)
         predicciones.append((moto_id, pred.est))
     
     # Ordenar las predicciones por calificación estimada
@@ -77,14 +86,24 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
     recomendaciones = motos_df[motos_df['id'].isin(mejores_recomendaciones)]
     
     # Incluir las motos que coinciden exactamente con las preferencias del usuario
-    motos_exactas = motos_df[
-        (motos_df['nombre'] == nombre) &
-        (motos_df['marca'] == marca) &
-        (motos_df['cilindraje'] == cilindraje)
-    ]
-    
-    # Combinar las recomendaciones colaborativas con las motos exactas
-    recomendaciones = pd.concat([recomendaciones, motos_exactas]).drop_duplicates().head(num_recomendaciones)
+    if not preferences_df.empty:
+        user_preferences = preferences_df.iloc[0]
+        nombre = user_preferences.get('nombre')
+        marca = user_preferences.get('marca')
+        cilindraje = user_preferences.get('cilindraje')
+        
+        # Crear una máscara de filtro basada en las preferencias disponibles
+        filtro = pd.Series([True] * len(motos_df))
+        if nombre:
+            filtro &= (motos_df['nombre'] == nombre)
+        if marca:
+            filtro &= (motos_df['marca'] == marca)
+        if cilindraje is not None:
+            filtro &= (motos_df['cilindraje'] == cilindraje)
+        
+        motos_exactas = motos_df[filtro]
+        
+        recomendaciones = pd.concat([recomendaciones, motos_exactas]).drop_duplicates().head(num_recomendaciones)
     
     return recomendaciones
 
@@ -92,14 +111,14 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
 try:
     recomendaciones = recomendar_motocicletas_colaborativo(user_id, num_recomendaciones)
 except Exception as e:
-    print(f"Error al generar recomendaciones: {e}")
+    print(f"{{\"error\": \"Error al generar recomendaciones: {e}\"}}")
     sys.exit(1)
 
 # Imprimir las recomendaciones en formato JSON
 try:
-    recomendaciones_json = recomendaciones[['nombre', 'marca', 'cilindraje', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo']].to_json(orient="records")
+    recomendaciones_json = recomendaciones[['id', 'nombre', 'marca', 'cilindraje', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo']].to_json(orient="records")
     # Asegúrate de que la salida final sea solo JSON
     print(recomendaciones_json)
 except Exception as e:
-    print(f"Error al convertir recomendaciones a JSON: {e}")
+    print(f"{{\"error\": \"Error al convertir recomendaciones a JSON: {e}\"}}")
     sys.exit(1)

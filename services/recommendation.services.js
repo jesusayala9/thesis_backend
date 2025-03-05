@@ -1,10 +1,26 @@
-const { Ratings, Motos } = require('../models');
-const { recomendar_motocicletas_colaborativo } = require('../recommendation/svd_algoritm');
+const { sequelize } = require("../config/config.db");
+const Recomendacion = require("../models/recommendations")(sequelize, require("sequelize").DataTypes);
 
-exports.addRating = async (user_id, moto_id, rating) => {
-    return await Ratings.create({ user_id, moto_id, rating });
+const guardarRecomendaciones = async (userId, motoIds) => {
+    try {
+        const recomendaciones = motoIds.map(motoId => ({
+            userId,
+            motoId,
+        }));
+        console.log("Recomendaciones a guardar:", recomendaciones); // Agregar log para verificar los datos
+        await Recomendacion.bulkCreate(recomendaciones);
+    } catch (error) {
+        throw new Error("Error al guardar las recomendaciones: " + error.message);
+    }
 };
 
-exports.getCollaborativeRecommendations = async (user_id, numRecomendaciones) => {
-    return await recomendar_motocicletas_colaborativo(user_id, numRecomendaciones);
+const obtenerRecomendacionesPorUsuario = async (userId) => {
+    try {
+        const recomendaciones = await Recomendacion.findAll({ where: { userId } });
+        return recomendaciones;
+    } catch (error) {
+        throw new Error("Error al obtener las recomendaciones: " + error.message);
+    }
 };
+
+module.exports = { guardarRecomendaciones, obtenerRecomendacionesPorUsuario };
