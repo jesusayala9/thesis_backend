@@ -27,5 +27,12 @@ module.exports = (sequelize, DataTypes) => {
         }
     );
 
+    Recomendacion.associate = (models) => {
+        Recomendacion.belongsTo(models.Motorcycle, {
+            foreignKey: "motoId",
+            as: "moto",
+        });
+    };
+
     return Recomendacion;
 };

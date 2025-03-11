@@ -50,5 +50,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
+  Motorcycle.associate = (models) => {
+    Motorcycle.hasMany(models.Recomendacion, {
+      foreignKey: "motoId",
+      as: "recomendaciones",
+    });
+  };
+
   return Motorcycle;
 };

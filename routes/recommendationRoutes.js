@@ -4,5 +4,6 @@ const recommendationController = require('../controllers/recommendationControlle
 
 router.post('/recommendations', recommendationController.getRecommendations);
 router.post('/recomendaciones', recommendationController.guardarRecomendaciones);
+router.get('/recomendaciones/:userId', recommendationController.obtenerRecomendacionesPorUsuario);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const { exec } = require('child_process');
 const path = require('path');
-const { guardarRecomendaciones } = require('../services/recommendation.services');
+const { guardarRecomendaciones, obtenerRecomendacionesPorUsuario } = require('../services/recommendation.services');
 
 exports.getRecommendations = async (req, res) => {
     const { userId, num_recomendaciones } = req.body;
@@ -41,5 +41,18 @@ exports.guardarRecomendaciones = async (req, res) => {
     } catch (error) {
         console.error("Error al guardar las recomendaciones:", error);
         res.status(500).json({ error: 'Error al guardar las recomendaciones' });
+    }
+};
+
+exports.obtenerRecomendacionesPorUsuario = async (req, res) => {
+    const { userId } = req.params;
+    console.log("Solicitud para obtener recomendaciones del usuario:", { userId });
+
+    try {
+        const recomendaciones = await obtenerRecomendacionesPorUsuario(userId);
+        res.status(200).json(recomendaciones);
+    } catch (error) {
+        console.error("Error al obtener las recomendaciones del usuario:", error);
+        res.status(500).json({ error: 'Error al obtener las recomendaciones del usuario' });
     }
 };
