@@ -5,5 +5,6 @@ const recommendationController = require('../controllers/recommendationControlle
 router.post('/recommendations', recommendationController.getRecommendations);
 router.post('/recomendaciones', recommendationController.guardarRecomendaciones);
 router.get('/recomendaciones/:userId', recommendationController.obtenerRecomendacionesPorUsuario);
+router.delete('/recomendaciones/:searchId', recommendationController.eliminarRecomendacion); // Añadir esta línea
 
 module.exports = router;

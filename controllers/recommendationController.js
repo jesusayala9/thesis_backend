@@ -1,6 +1,6 @@
 const { exec } = require('child_process');
 const path = require('path');
-const { guardarRecomendaciones, obtenerRecomendacionesPorUsuario } = require('../services/recommendation.services');
+const { guardarRecomendaciones, obtenerRecomendacionesPorUsuario, eliminarRecomendacion } = require('../services/recommendation.services');
 
 exports.getRecommendations = async (req, res) => {
     const { userId, num_recomendaciones } = req.body;
@@ -63,5 +63,18 @@ exports.obtenerRecomendacionesPorUsuario = async (req, res) => {
     } catch (error) {
         console.error("Error al obtener las recomendaciones del usuario:", error);
         res.status(500).json({ error: 'Error al obtener las recomendaciones del usuario' });
+    }
+};
+
+exports.eliminarRecomendacion = async (req, res) => {
+    const { searchId } = req.params;
+    console.log("Solicitud para eliminar recomendaciones:", { searchId });
+
+    try {
+        await eliminarRecomendacion(searchId);
+        res.status(200).json({ message: 'Recomendación eliminada correctamente' });
+    } catch (error) {
+        console.error("Error al eliminar la recomendación:", error);
+        res.status(500).json({ error: 'Error al eliminar la recomendación' });
     }
 };

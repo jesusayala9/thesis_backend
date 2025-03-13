@@ -49,10 +49,15 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
         nombre = user_preferences.get('nombre')
         marca = user_preferences.get('marca')
         cilindraje = user_preferences.get('cilindraje')
+        precioMin = user_preferences.get('precioMin')
+        precioMax = user_preferences.get('precioMax')
         
-        # Asegurarse de que el tipo de datos de cilindraje sea el mismo
+        # Asegurarse de que el tipo de datos de cilindraje y precios sean los mismos
         cilindraje = float(cilindraje) if cilindraje is not None else None
+        precioMin = float(precioMin) if precioMin is not None else None
+        precioMax = float(precioMax) if precioMax is not None else None
         motos_df['cilindraje'] = motos_df['cilindraje'].astype(float)
+        motos_df['precio'] = motos_df['precio'].astype(float)
         
         # Crear una máscara de filtro basada en las preferencias disponibles
         filtro = pd.Series([True] * len(motos_df))
@@ -62,6 +67,10 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
             filtro &= (motos_df['marca'] == marca)
         if cilindraje is not None:
             filtro &= (motos_df['cilindraje'] == cilindraje)
+        if precioMin is not None:
+            filtro &= (motos_df['precio'] >= precioMin)
+        if precioMax is not None:
+            filtro &= (motos_df['precio'] <= precioMax)
         
         motos_filtradas = motos_df[filtro]
     else:
@@ -91,6 +100,8 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
         nombre = user_preferences.get('nombre')
         marca = user_preferences.get('marca')
         cilindraje = user_preferences.get('cilindraje')
+        precioMin = user_preferences.get('precioMin')
+        precioMax = user_preferences.get('precioMax')
         
         # Crear una máscara de filtro basada en las preferencias disponibles
         filtro = pd.Series([True] * len(motos_df))
@@ -100,6 +111,10 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
             filtro &= (motos_df['marca'] == marca)
         if cilindraje is not None:
             filtro &= (motos_df['cilindraje'] == cilindraje)
+        if precioMin is not None:
+            filtro &= (motos_df['precio'] >= precioMin)
+        if precioMax is not None:
+            filtro &= (motos_df['precio'] <= precioMax)
         
         motos_exactas = motos_df[filtro]
         
@@ -116,7 +131,7 @@ except Exception as e:
 
 # Imprimir las recomendaciones en formato JSON
 try:
-    recomendaciones_json = recomendaciones[['id', 'nombre', 'marca', 'cilindraje', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo']].to_json(orient="records")
+    recomendaciones_json = recomendaciones[['id', 'nombre', 'marca', 'cilindraje', 'precio', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo']].to_json(orient="records")
     # Asegúrate de que la salida final sea solo JSON
     print(recomendaciones_json)
 except Exception as e:

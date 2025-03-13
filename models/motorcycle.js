@@ -43,6 +43,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      precio: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      }
+
     },
     {
       tableName: "motos",

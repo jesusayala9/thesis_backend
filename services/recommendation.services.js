@@ -49,4 +49,14 @@ const obtenerRecomendacionesPorUsuario = async (userId) => {
     }
 };
 
-module.exports = { guardarRecomendaciones, obtenerRecomendacionesPorUsuario };
+const eliminarRecomendacion = async (searchId) => {
+    try {
+        await Recomendacion.destroy({
+            where: { searchId }
+        });
+    } catch (error) {
+        throw new Error("Error al eliminar la recomendación: " + error.message);
+    }
+};
+
+module.exports = { guardarRecomendaciones, obtenerRecomendacionesPorUsuario, eliminarRecomendacion };
