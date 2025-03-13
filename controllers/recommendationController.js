@@ -50,7 +50,16 @@ exports.obtenerRecomendacionesPorUsuario = async (req, res) => {
 
     try {
         const recomendaciones = await obtenerRecomendacionesPorUsuario(userId);
-        res.status(200).json(recomendaciones);
+        const agrupadasPorBusqueda = recomendaciones.reduce((acc, rec) => {
+            const searchId = rec.searchId;
+            const createdAt = rec.createdAt.toISOString().split('T')[0]; // Obtener solo la fecha
+            if (!acc[searchId]) {
+                acc[searchId] = { createdAt, recomendaciones: [] };
+            }
+            acc[searchId].recomendaciones.push(rec);
+            return acc;
+        }, {});
+        res.status(200).json(agrupadasPorBusqueda);
     } catch (error) {
         console.error("Error al obtener las recomendaciones del usuario:", error);
         res.status(500).json({ error: 'Error al obtener las recomendaciones del usuario' });

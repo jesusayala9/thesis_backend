@@ -15,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: false,
             },
+            searchId: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
             createdAt: {
                 type: DataTypes.DATE,
                 allowNull: false,
