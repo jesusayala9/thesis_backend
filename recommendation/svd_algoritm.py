@@ -131,7 +131,8 @@ except Exception as e:
 
 # Imprimir las recomendaciones en formato JSON
 try:
-    recomendaciones_json = recomendaciones[['id', 'nombre', 'marca', 'cilindraje', 'precio', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo']].to_json(orient="records")
+    # Incluye el campo 'imagen' en la salida final
+    recomendaciones_json = recomendaciones[['id', 'nombre', 'marca', 'cilindraje', 'precio', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo', 'imagen']].to_json(orient="records")
     # Asegúrate de que la salida final sea solo JSON
     print(recomendaciones_json)
 except Exception as e:
