@@ -13,6 +13,7 @@ const recoveryRoutes = require("./routes/password-recovery");
 const getUser = require("./routes/get-user.router");
 const getMotorcycle = require("./routes/motorcycleRouter");
 const profileRoutes = require("./routes/profileRoutes"); // Importar las rutas del perfil
+const chatbotRoutes = require("./routes/chatbotRoutes"); // Importar las rutas del ChatBot
 
 const config = require("./config/config.env");
 
@@ -30,7 +31,7 @@ app.use("/api", recoveryRoutes);
 app.use("/api", getUser);
 app.use("/api", getMotorcycle);
 app.use("/api", profileRoutes); // Usar las rutas del perfil
-
+app.use("/api/chatbot", chatbotRoutes); // Usar las rutas del ChatBot
 
 const PORT = config.port || 3001;
 
