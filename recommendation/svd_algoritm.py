@@ -52,7 +52,7 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
         precioMin = user_preferences.get('precioMin')
         precioMax = user_preferences.get('precioMax')
         
-        # Asegurarse de que el tipo de datos de cilindraje y precios sean los mismos
+        # Aseguramos de que el tipo de datos de cilindraje y precios sean los mismos
         cilindraje = float(cilindraje) if cilindraje is not None else None
         precioMin = float(precioMin) if precioMin is not None else None
         precioMax = float(precioMax) if precioMax is not None else None
@@ -133,7 +133,7 @@ except Exception as e:
 try:
     # Incluye el campo 'imagen' en la salida final
     recomendaciones_json = recomendaciones[['id', 'nombre', 'marca', 'cilindraje', 'precio', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo', 'imagen']].to_json(orient="records")
-    # Asegúrate de que la salida final sea solo JSON
+    # Nos aseguramos  de que la salida final sea solo JSON
     print(recomendaciones_json)
 except Exception as e:
     print(f"{{\"error\": \"Error al convertir recomendaciones a JSON: {e}\"}}")
