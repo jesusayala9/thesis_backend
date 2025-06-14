@@ -3,6 +3,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 from surprise import Dataset, Reader, SVD
 from surprise.model_selection import train_test_split
+from fuzzywuzzy import fuzz
 
 # Obtener los argumentos de la línea de comandos
 user_id = sys.argv[1]
@@ -18,7 +19,6 @@ except Exception as e:
     sys.exit(1)
 
 try:
-    # Obtener los datos de las tablas preferences, motos y ratings
     preferences_query = "SELECT * FROM preferences WHERE \"userId\" = %s ORDER BY \"createdAt\" DESC LIMIT 1"
     motos_query = "SELECT * FROM motos"
     ratings_query = "SELECT * FROM ratings"
@@ -30,20 +30,13 @@ except Exception as e:
     print(f"{{\"error\": \"Error al obtener datos de la base de datos: {e}\"}}")
     sys.exit(1)
 
-# Definir la función de recomendación colaborativa
 def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
-    # Preparar los datos para Surprise
     reader = Reader(rating_scale=(1, 5))
-    data = Dataset.load_from_df(ratings_df[['userId', 'motoId', 'rating']], reader)  # Asegúrate de usar los nombres correctos de las columnas
-    
-    # Dividir los datos en conjuntos de entrenamiento y prueba
-    trainset, testset = train_test_split(data, test_size=0.25)
-    
-    # Entrenar el modelo SVD
+    data = Dataset.load_from_df(ratings_df[['userId', 'motoId', 'rating']], reader)
+    trainset, _ = train_test_split(data, test_size=0.25)
     algo = SVD()
     algo.fit(trainset)
-    
-    # Filtrar las motos basadas en las preferencias del usuario
+
     if not preferences_df.empty:
         user_preferences = preferences_df.iloc[0]
         nombre = user_preferences.get('nombre')
@@ -51,89 +44,90 @@ def recomendar_motocicletas_colaborativo(user_id, num_recomendaciones=5):
         cilindraje = user_preferences.get('cilindraje')
         precioMin = user_preferences.get('precioMin')
         precioMax = user_preferences.get('precioMax')
-        
-        # Aseguramos de que el tipo de datos de cilindraje y precios sean los mismos
+
         cilindraje = float(cilindraje) if cilindraje is not None else None
         precioMin = float(precioMin) if precioMin is not None else None
         precioMax = float(precioMax) if precioMax is not None else None
         motos_df['cilindraje'] = motos_df['cilindraje'].astype(float)
         motos_df['precio'] = motos_df['precio'].astype(float)
-        
-        # Crear una máscara de filtro basada en las preferencias disponibles
-        filtro = pd.Series([True] * len(motos_df))
+
+        # Buscar coincidencia exacta normalizada (sin espacios y en minúsculas)
+        exacto_filtro = pd.Series([True] * len(motos_df))
         if nombre:
-            filtro &= (motos_df['nombre'] == nombre)
+            exacto_filtro &= motos_df['nombre'].str.strip().str.lower() == str(nombre).strip().lower()
         if marca:
-            filtro &= (motos_df['marca'] == marca)
+            exacto_filtro &= motos_df['marca'].str.strip().str.lower() == str(marca).strip().lower()
         if cilindraje is not None:
-            filtro &= (motos_df['cilindraje'] == cilindraje)
+            exacto_filtro &= (motos_df['cilindraje'] == float(cilindraje))
+        if precioMin is not None:
+            exacto_filtro &= (motos_df['precio'] >= precioMin)
+        if precioMax is not None:
+            exacto_filtro &= (motos_df['precio'] <= precioMax)
+        moto_exacta = motos_df[exacto_filtro]
+
+        # Filtrar por fuzzy y preferencias flexibles (marca solo si hay suficientes resultados)
+        filtro = pd.Series([True] * len(motos_df))
         if precioMin is not None:
             filtro &= (motos_df['precio'] >= precioMin)
         if precioMax is not None:
             filtro &= (motos_df['precio'] <= precioMax)
-        
-        motos_filtradas = motos_df[filtro]
+        if cilindraje is not None:
+            filtro &= (abs(motos_df['cilindraje'] - cilindraje) <= 50)
+        if nombre:
+            filtro &= motos_df['nombre'].apply(lambda x: fuzz.token_set_ratio(str(x).lower(), str(nombre).lower()) >= 85)
+        # Marca solo si el usuario la especificó
+        if marca:
+            filtro_marca = filtro & motos_df['marca'].apply(lambda x: fuzz.token_set_ratio(str(x).lower(), str(marca).lower()) >= 85)
+            motos_filtradas = motos_df[filtro_marca]
+            # Si no hay suficientes motos de la marca, rellena con otras marcas pero siempre respetando el precio
+            if len(motos_filtradas) < num_recomendaciones:
+                motos_filtradas = pd.concat([
+                    motos_filtradas,
+                    motos_df[filtro & ~motos_df['marca'].apply(lambda x: fuzz.token_set_ratio(str(x).lower(), str(marca).lower()) >= 85)]
+                ]).drop_duplicates()
+        else:
+            motos_filtradas = motos_df[filtro]
+
+        # Rellenar con motos de cilindraje similar (sin importar marca, pero siempre respetando precio)
+        if len(motos_filtradas) < num_recomendaciones and cilindraje is not None:
+            filtro_cilindraje = (abs(motos_df['cilindraje'] - cilindraje) <= 50)
+            if precioMin is not None:
+                filtro_cilindraje &= (motos_df['precio'] >= precioMin)
+            if precioMax is not None:
+                filtro_cilindraje &= (motos_df['precio'] <= precioMax)
+            motos_cilindraje = motos_df[filtro_cilindraje]
+            motos_filtradas = pd.concat([motos_filtradas, motos_cilindraje]).drop_duplicates()
     else:
         motos_filtradas = motos_df
-    
-    # Obtener todas las motos que el usuario no ha calificado
+        moto_exacta = pd.DataFrame()  
+
+    # Predecir para todas las motos filtradas que el usuario no ha calificado
     motos_no_calificadas = motos_filtradas[~motos_filtradas['id'].isin(ratings_df[ratings_df['userId'] == int(user_id)]['motoId'])]
-    
-    # Predecir las calificaciones para las motos no calificadas
+
     predicciones = []
     for moto_id in motos_no_calificadas['id']:
         pred = algo.predict(int(user_id), moto_id)
         predicciones.append((moto_id, pred.est))
-    
-    # Ordenar las predicciones por calificación estimada
+
     predicciones.sort(key=lambda x: x[1], reverse=True)
-    
-    # Obtener las mejores recomendaciones
     mejores_recomendaciones = [moto_id for moto_id, _ in predicciones[:num_recomendaciones]]
-    
-    # Filtrar las motos recomendadas
+
     recomendaciones = motos_df[motos_df['id'].isin(mejores_recomendaciones)]
-    
-    # Incluir las motos que coinciden exactamente con las preferencias del usuario
-    if not preferences_df.empty:
-        user_preferences = preferences_df.iloc[0]
-        nombre = user_preferences.get('nombre')
-        marca = user_preferences.get('marca')
-        cilindraje = user_preferences.get('cilindraje')
-        precioMin = user_preferences.get('precioMin')
-        precioMax = user_preferences.get('precioMax')
-        
-        # Crear una máscara de filtro basada en las preferencias disponibles
-        filtro = pd.Series([True] * len(motos_df))
-        if nombre:
-            filtro &= (motos_df['nombre'] == nombre)
-        if marca:
-            filtro &= (motos_df['marca'] == marca)
-        if cilindraje is not None:
-            filtro &= (motos_df['cilindraje'] == cilindraje)
-        if precioMin is not None:
-            filtro &= (motos_df['precio'] >= precioMin)
-        if precioMax is not None:
-            filtro &= (motos_df['precio'] <= precioMax)
-        
-        motos_exactas = motos_df[filtro]
-        
-        recomendaciones = pd.concat([recomendaciones, motos_exactas]).drop_duplicates().head(num_recomendaciones)
-    
+
+    # --- Unir la moto exacta al principio, sin duplicados ---
+    if not moto_exacta.empty:
+        recomendaciones = pd.concat([moto_exacta, recomendaciones]).drop_duplicates().head(num_recomendaciones)
+
     return recomendaciones
 
-# Obtener las recomendaciones colaborativas
 try:
     recomendaciones = recomendar_motocicletas_colaborativo(user_id, num_recomendaciones)
 except Exception as e:
     print(f"{{\"error\": \"Error al generar recomendaciones: {e}\"}}")
     sys.exit(1)
 
-# Imprimir las recomendaciones en formato JSON
 try:
-    # Incluye el campo 'imagen' en la salida final
     recomendaciones_json = recomendaciones[['id', 'nombre', 'marca', 'cilindraje', 'precio', 'peso', 'transmision', 'freno_delantero', 'freno_trasero', 'modelo', 'imagen']].to_json(orient="records")
-    # Nos aseguramos  de que la salida final sea solo JSON
     print(recomendaciones_json)
 except Exception as e:
     print(f"{{\"error\": \"Error al convertir recomendaciones a JSON: {e}\"}}")
